@@ -1,0 +1,26 @@
+program         -> declaration* EOF ;
+
+declaration     -> funDecl
+                 | varDecl
+                 | expression ;
+
+funDecl         -> "fn" IDENTIFIER "(" parameters? ")" "->" expression ;
+varDecl         -> "let" IDENTIFIER "=" expression ;
+
+expression      -> literal
+                 | unary
+                 | binary
+                 | grouping
+                 | ifExpr
+                 | functionCall ;
+
+literal         -> NUMBER | STRING | "true" | "false" | "nil" | list ;
+grouping        -> "(" expression ")" ;
+ifExpr          -> "if" expression "then" expression "else" expression ;
+functionCall    -> IDENTIFIER "(" arguments? ")" ;
+
+binary          -> expression operator expression ;
+unary           -> ("-" | "!") expression ;
+parameters      -> IDENTIFIER ( " " IDENTIFIER )* ;
+arguments       -> expression ( " " expression )* ;
+list            -> "[" expression ( " " expression )* "]" ;
