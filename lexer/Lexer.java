@@ -27,31 +27,39 @@ public class Lexer {
     private void scanToken() {
         char c = advance();
         switch (c) {
+            case '=': addToken(TokenType.EQUAL); break;
             case '(': addToken(TokenType.LEFT_PAREN); break;
             case ')': addToken(TokenType.RIGHT_PAREN); break;
             case '+': addToken(TokenType.PLUS); break;
             case '-': addToken(TokenType.MINUS); break;
-            case '*': addToken(TokenType.STAR); break;
-            case '/': addToken(TokenType.SLASH); break;
+            case '*': addToken(TokenType.MUL); break;
+            case '/': addToken(TokenType.DIV); break;
             default:
                 if (isDigit(c)) {
                     number();
-                } else if (!isWhitespace(c)) {
-                    // Handle unexpected character
+                } else if (!isWhitespace(c)) { //Unexpected Character
+                    System.out.println("Illegal Character: " + "'" + c + "'");
                 }
                 break;
         }
     }
 
     private void number() {
+        Boolean isDouble = false;
         while (isDigit(peek())) advance();
-
+        
         if (peek() == '.' && isDigit(peekNext())) {
+            isDouble = true;
             advance();
             while (isDigit(peek())) advance();
         }
 
-        addToken(TokenType.NUMBER, source.substring(start, current));
+        if(isDouble){
+            addToken(TokenType.DOUBLE, source.substring(start, current));
+        }
+        else{
+            addToken(TokenType.INT, source.substring(start, current));
+        }
     }
 
     private boolean isDigit(char c) {
@@ -87,5 +95,9 @@ public class Lexer {
     private void addToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
+    }
+
+    public List<Token> getTokens(){
+        return tokens;
     }
 }

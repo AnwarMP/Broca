@@ -1,25 +1,26 @@
 package repl;
 
-import interpreter.Interpreter;
-import lexer.Lexer;
-import parser.Parser;
-import lexer.Token;
+import lexer.*;
+import parser.*;
 
 import java.util.Scanner;
 
 public class Repl {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Interpreter interpreter = new Interpreter();
 
         while (true) {
-            System.out.print("> ");
+            System.out.print("Broca > ");
             String line = scanner.nextLine();
             if (line == null) break;
 
             Lexer lexer = new Lexer(line);
             Parser parser = new Parser(lexer.scanTokens());
-            interpreter.interpret(parser.parse());
+            //Root node of AST
+            ASTNode rootNode = parser.parse();
+            Interpreter interpreter = new Interpreter();
+            interpreter.interpret(rootNode);
+
         }
     }
 }

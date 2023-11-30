@@ -1,0 +1,7 @@
+expr: term ((PLUS|MINUS) term)*
+
+term:  factor((MUL|DIV) factor)*
+
+factor  : INT|FLOAT
+        : (PLUS|MINUS) factor
+        : LEFT_PAREN expr RIGHT_PAREN
