@@ -9,5 +9,5 @@ public enum TokenType {
 
     KEYWORD, IDENTIFIER, EQUAL, 
 
-    EOF
+    EOF;
 }

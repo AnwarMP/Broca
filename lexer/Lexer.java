@@ -1,11 +1,13 @@
 package lexer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Lexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
+    private final List<String> keywords = new ArrayList<>(Arrays.asList("VAR"));
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -21,6 +23,9 @@ public class Lexer {
         }
 
         tokens.add(new Token(TokenType.EOF, "", null, line));
+        for(Token s: tokens){
+            System.out.println(s.toString());
+        }
         return tokens;
     }
 
@@ -36,19 +41,40 @@ public class Lexer {
             case '/': addToken(TokenType.DIV); break;
             default:
                 if (isDigit(c)) {
-                    number();
-                } else if (!isWhitespace(c)) { //Unexpected Character
+                    createNumber();
+                } 
+                else if(isLetter(c)){
+                    createIdentifierOrKeyword(c);
+                }
+                else if (!isWhitespace(c)) { //Unexpected Character
                     System.out.println("Illegal Character: " + "'" + c + "'");
                 }
                 break;
         }
     }
 
-    private void number() {
+    private void createIdentifierOrKeyword(Character c){
+        String idString = "" + c;
+
+        while(isLetter(peek())){
+            idString += peek();
+            advance();
+        }
+        System.out.println(idString);
+        if(isKeyword(idString)){
+            addToken(TokenType.KEYWORD, idString);
+        }
+        else {
+            addToken(TokenType.IDENTIFIER, idString);
+        }
+        
+    }
+
+    private void createNumber() {
         Boolean isDouble = false;
         while (isDigit(peek())) advance();
         
-        if (peek() == '.' && isDigit(peekNext())) {
+        if(peek() == '.' && isDigit(peekNext())) {
             isDouble = true;
             advance();
             while (isDigit(peek())) advance();
@@ -62,8 +88,16 @@ public class Lexer {
         }
     }
 
+    private boolean isKeyword(String s){
+        return keywords.contains(s);
+    }
+
     private boolean isDigit(char c) {
         return c >= '0' && c <= '9';
+    }
+
+    private boolean isLetter(char c) {
+        return Character.isLetter(c);
     }
 
     private boolean isWhitespace(char c) {

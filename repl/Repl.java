@@ -6,9 +6,9 @@ import parser.*;
 import java.util.Scanner;
 
 public class Repl {
+    public static SymbolTable symbolTable = new SymbolTable();
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
         while (true) {
             System.out.print("Broca > ");
             String line = scanner.nextLine();

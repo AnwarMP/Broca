@@ -11,25 +11,25 @@ public class Parser {
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
+        this.currToken = tokens.get(current);
     }
 
     //To parse, follow the grammar --> start with expr
     public ASTNode parse() {
         ASTNode parsedExpression = this.expr();
-        //System.out.println(parsedExpression.toString());
+        System.out.println("Parser: " + parsedExpression.toString());
         return parsedExpression;
     }
 
     public Token advance() {
         this.current++;
-        Token currToken = null;
         if(this.current < tokens.size()){
             this.currToken = tokens.get(this.current);
         }
         else{
             this.currToken =  null;
         }
-        return currToken;
+        return null;
     }
 
     /*
@@ -50,6 +50,10 @@ public class Parser {
         else if(tok.getType() == TokenType.INT || tok.getType() == TokenType.DOUBLE){
             this.advance();
             return new NumberNode(tok);
+        }
+        else if(tok.getType() == TokenType.IDENTIFIER){
+            this.advance();
+            return new VarAccessNode(tok);
         }
         else if(tok.getType() == TokenType.LEFT_PAREN){
             this.advance();
@@ -78,8 +82,26 @@ public class Parser {
 
     //expr: term ((PLUS|MINUS) term)*
     public ASTNode expr(){
-        ASTNode left = term();
 
+        //check first if there is a variable
+        if(this.tokens.get(current).getType() == TokenType.KEYWORD && this.currToken.getLiteral().equals("VAR")){
+            //get indentifier 
+            this.advance();
+            String variableName = (String)this.currToken.getLiteral();
+
+            //check if theres an equal
+            this.advance();
+            if(this.currToken.getType() != TokenType.EQUAL){
+                throw new RuntimeException("Expected '='");
+            }
+
+            //get expression to assign variable
+            this.advance();
+            ASTNode expression = this.expr();
+            return new VarAssignNode(variableName, expression);
+        }
+
+        ASTNode left = term();
         while(current < tokens.size() && (this.currToken.getType() == TokenType.PLUS || this.currToken.getType() == TokenType.MINUS)){
             Token op = this.currToken;
             this.advance();

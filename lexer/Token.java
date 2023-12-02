@@ -17,6 +17,10 @@ public class Token {
         return type;
     }
 
+    public String getLexeme(){
+        return lexeme;
+    }
+
     public Object getLiteral() {
         return literal;
     }

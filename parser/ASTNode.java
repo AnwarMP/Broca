@@ -32,6 +32,46 @@ class NumberNode extends ASTNode {
     }
 }
 
+class VarAccessNode extends ASTNode{
+    private Token token;
+
+    public VarAccessNode (Token token){
+        this.token = token;
+    }
+
+    public Token getToken() {
+        return token;
+    }
+
+    @Override
+    public String toString() {
+        return token.toString();
+    }
+}
+
+class VarAssignNode extends ASTNode{
+    private String variableName;
+    private ASTNode valueNode;
+
+    public VarAssignNode(String variableName, ASTNode valueNode){
+        this.variableName = variableName;
+        this.valueNode = valueNode;
+    }
+
+    public String getVarName(){
+        return variableName;
+    }
+
+    public ASTNode getValueNode(){
+        return valueNode;
+    }
+
+    @Override
+    public String toString() {
+        return "(VAR: "+ variableName + ", "+ valueNode.toString()+")";
+    }
+}
+
 class BinOpNode extends ASTNode {
     private ASTNode leftNode;
     private ASTNode rightNode;

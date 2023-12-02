@@ -1,9 +1,15 @@
 package parser;
 
+import java.util.*;
+
 import lexer.*;
 import parser.*;
+import repl.*;
 
 public class Interpreter {
+
+    private static SymbolTable symbolTable = SymbolTable.getInstance();
+
     public Object interpret(ASTNode node) {
         Object result = visitNode(node);
         System.out.println(result);
@@ -20,9 +26,35 @@ public class Interpreter {
         else if (node instanceof BinOpNode) {
             return visitBinOpNode((BinOpNode) node);
         }
+        else if(node instanceof VarAccessNode){
+            return visitVarAccessNode((VarAccessNode) node);
+        }
+        else if(node instanceof VarAssignNode){
+            return visitVarAssignNode((VarAssignNode) node);
+        }
         else {
             throw new RuntimeException("Unknown node type");
         }
+    }
+
+    private Object visitVarAccessNode(VarAccessNode node){
+        String varName = (String) node.getToken().getLiteral();
+        System.out.println("hashmap is empty: " + symbolTable.isEmpty());
+        Object value = symbolTable.get(varName);
+
+        if(value == null){
+            throw new RuntimeException(varName + " is null");
+        }
+
+        return value;
+    }
+
+    private Object visitVarAssignNode(VarAssignNode node){
+        String varName = node.getVarName();
+        Object value = visitNode(node.getValueNode());
+
+        symbolTable.put(varName, value);
+        return value;
     }
 
     private Object visitNumberNode(NumberNode node) {
