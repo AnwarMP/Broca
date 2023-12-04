@@ -32,9 +32,33 @@ public class Interpreter {
         else if(node instanceof VarAssignNode){
             return visitVarAssignNode((VarAssignNode) node);
         }
+        else if(node instanceof IfNode){
+            return visitIfNode((IfNode) node);
+        }
         else {
             throw new RuntimeException("Unknown node type");
         }
+    }
+
+    private Object visitIfNode(IfNode node){
+        List<Case> cases = node.getCases();
+
+        for(int i = 0; i < cases.size(); i++){
+            Case currCase = cases.get(i);
+            Object conditionValue = this.visitNode(currCase.getCondition());
+
+            if(isTruth(conditionValue)){
+                Object expressionValue = this.visitNode(currCase.getExpression());
+                return expressionValue;
+            }
+        }
+
+        if(node.getElseCase() != null){
+            Object expressionValue = this.visitNode(node.getElseCase());
+            return expressionValue;
+        }
+
+        return null;
     }
 
     private Object visitVarAccessNode(VarAccessNode node){

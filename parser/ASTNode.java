@@ -1,5 +1,7 @@
 package parser;
 
+import java.util.*;
+
 import lexer.Token;
 import lexer.TokenType;
 
@@ -122,5 +124,41 @@ class UnaryOpNode extends ASTNode {
     @Override
     public String toString() {
         return "(" + operator.getType() + ", " + node.toString() + ")";
+    }
+}
+
+class IfNode extends ASTNode {
+    private List<Case> cases;
+    private ASTNode elseCase;
+
+    public IfNode(List<Case> cases, ASTNode elseCase) {
+        this.cases = cases;
+        this.elseCase = elseCase;
+    }
+
+    public List<Case> getCases(){
+        return this.cases;
+    }
+
+    public ASTNode getElseCase(){
+        return this.elseCase;
+    }
+}
+
+class Case {
+    private ASTNode condition;
+    private ASTNode expression;
+
+    public Case(ASTNode condition, ASTNode expression) {
+        this.condition = condition;
+        this.expression = expression;
+    }
+
+    public ASTNode getCondition(){
+        return this.condition;
+    }
+
+    public ASTNode getExpression(){
+        return this.expression;
     }
 }

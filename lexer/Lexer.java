@@ -7,7 +7,7 @@ import java.util.List;
 public class Lexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
-    private final List<String> keywords = new ArrayList<>(Arrays.asList("VAR", "AND", "OR", "NOT"));
+    private final List<String> keywords = new ArrayList<>(Arrays.asList("VAR", "AND", "OR", "NOT", "IF", "THEN", "ELIF", "ELSE"));
     private int start = 0;
     private int current = 0;
     private int line = 1;

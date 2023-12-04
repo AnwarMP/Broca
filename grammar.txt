@@ -11,3 +11,8 @@
 <factor> ::= ("PLUS" | "MINUS") <factor>
          | "INT" | "DOUBLE" | "IDENTIFIER"
          | "LEFT_PAREN" <expr> "RIGHT_PAREN"
+         | <if=expr>
+
+<if-expr> ::= "KEYWORD:IF" <expr> "KEYWORD:THEN" <expr>
+                ("KEYWORD:ELIF" <expr> "KEYWORD:THEN" expr)*
+                ("KEYWORD:ELSE" <expr>)?

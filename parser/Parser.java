@@ -1,5 +1,6 @@
 package parser;
 
+import java.util.ArrayList;
 import java.util.List;
 import lexer.Token;
 import lexer.TokenType;
@@ -156,6 +157,73 @@ public class Parser {
                 return exprNode;
             }
         }
+        //<if-expr>
+        else if(tok.getType() == TokenType.KEYWORD && tok.getLexeme().equals("IF")){
+            return ifExpr();
+        }
         return null;
     }
+
+    /*
+     * "KEYWORD:IF" <expr> "KEYWORD:THEN" <expr>
+                ("KEYWORD:ELIF" <expr> "KEYWORD:THEN" expr)*
+                ("KEYWORD:ELSE" <expr>)?
+     */
+    public ASTNode ifExpr(){
+        Token tok = tokens.get(current);
+        List<Case> cases = new ArrayList<>();
+        ASTNode elseCase = null;
+
+        //check if
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("IF")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'IF'");
+        }
+
+        //get conditional statement
+        ASTNode condition = this.expr();  
+        
+        //check then
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("THEN")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'THEN'");
+        }
+
+        //get expression after conditional statement
+        ASTNode expression = this.expr();
+
+        //get case to cases
+        cases.add(new Case(condition, expression));
+
+        //add subsequent cases if 'ELIF'
+        while(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("ELIF")){
+            this.advance();
+            
+            ASTNode condition1 = this.expr();
+
+            if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("THEN")){
+                this.advance();
+            }
+            else{
+                throw new RuntimeException("Expected 'THEN'");
+            }
+            
+            ASTNode expression1 = this.expr();
+            cases.add(new Case(condition1, expression1));
+        }
+
+        //check Else
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("ELSE")){
+            this.advance();
+
+            elseCase = this.expr();  
+        }
+        return new IfNode(cases, elseCase);
+    } 
+
+
 }
