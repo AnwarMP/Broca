@@ -1,8 +1,13 @@
-expr    :KEYWORD: VAR IDENTIFIER EQUAL expr
-         term ((PLUS|MINUS) term)*
+<expr> ::= "KEYWORD:VAR" "IDENTIFIER" "EQUAL" <arith-expr>
+        | <comp-expr> (("KEYWORD:AND"|"KEYWORD:OR") <comp-expr>)*
 
-term:  factor((MUL|DIV) factor)*
+<comp-expr> ::= NOT <comp-expr>
+        | <arthi-expr> (("EE"|"LT"|"GT"|"LTE"|"GTE") <arthi-expr>)*
 
-factor  : INT|FLOAT
-        : (PLUS|MINUS) factor
-        : LEFT_PAREN expr RIGHT_PAREN
+<arith-expr> ::= <term> (("PLUS" | "MINUS") <term>)*
+
+<term> ::= <factor> (("MUL" | "DIV") <factor>)*
+
+<factor> ::= ("PLUS" | "MINUS") <factor>
+         | "INT" | "DOUBLE" | "IDENTIFIER"
+         | "LEFT_PAREN" <expr> "RIGHT_PAREN"

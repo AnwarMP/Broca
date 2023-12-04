@@ -7,7 +7,7 @@ import java.util.List;
 public class Lexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
-    private final List<String> keywords = new ArrayList<>(Arrays.asList("VAR"));
+    private final List<String> keywords = new ArrayList<>(Arrays.asList("VAR", "AND", "OR", "NOT"));
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -22,17 +22,20 @@ public class Lexer {
             scanToken();
         }
 
+        //Indicate the End of File
         tokens.add(new Token(TokenType.EOF, "", null, line));
-        for(Token s: tokens){
-            System.out.println(s.toString());
-        }
+        //Print tokens
+        // for(Token s: tokens){
+        //     System.out.println(s.toString());
+        // }
         return tokens;
     }
 
     private void scanToken() {
         char c = advance();
+        //System.out.println("index: " + current + ", char: " + c);
         switch (c) {
-            case '=': addToken(TokenType.EQUAL); break;
+            //case '=': addToken(TokenType.EQUAL); break;
             case '(': addToken(TokenType.LEFT_PAREN); break;
             case ')': addToken(TokenType.RIGHT_PAREN); break;
             case '+': addToken(TokenType.PLUS); break;
@@ -46,10 +49,63 @@ public class Lexer {
                 else if(isLetter(c)){
                     createIdentifierOrKeyword(c);
                 }
+                else if (c == '!'){
+                    createNotEquals();
+                }
+                else if (c == '='){
+                    createEquals();
+                }
+                else if(c == '<'){
+                    createLessThan();
+                }
+                else if(c == '>'){
+                    createGreaterThan();
+                }
                 else if (!isWhitespace(c)) { //Unexpected Character
                     System.out.println("Illegal Character: " + "'" + c + "'");
                 }
                 break;
+        }
+    }
+
+    private void createGreaterThan(){
+        //if >=
+        if(peek() == '='){
+            advance();
+            addToken(TokenType.GTE);
+        }
+        else { //if >
+            addToken(TokenType.GT);
+        }
+    }
+
+    private void createLessThan(){
+        //if <=
+        if(peek() == '='){
+            advance();
+            addToken(TokenType.LTE);
+        }
+        else { // if <
+            addToken(TokenType.LT);
+        }
+    }
+
+    private void createEquals(){
+        //if double =
+        if(peek() == '='){
+            advance();
+            addToken(TokenType.EE);
+        }
+        else { // if =
+            addToken(TokenType.EQUAL);
+        }
+    }
+
+    private void createNotEquals(){
+        //if !=
+        if(peek() == '='){
+            advance();
+            addToken(TokenType.NE);
         }
     }
 
@@ -60,7 +116,7 @@ public class Lexer {
             idString += peek();
             advance();
         }
-        System.out.println(idString);
+
         if(isKeyword(idString)){
             addToken(TokenType.KEYWORD, idString);
         }
@@ -86,6 +142,15 @@ public class Lexer {
         else{
             addToken(TokenType.INT, source.substring(start, current));
         }
+    }
+
+
+    /*
+     * HELPER METHODS
+     */
+
+    private char advance() {
+        return source.charAt(current++);
     }
 
     private boolean isKeyword(String s){
@@ -116,10 +181,6 @@ public class Lexer {
 
     private boolean isAtEnd() {
         return current >= source.length();
-    }
-
-    private char advance() {
-        return source.charAt(current++);
     }
 
     private void addToken(TokenType type) {

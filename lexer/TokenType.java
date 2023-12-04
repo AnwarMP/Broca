@@ -7,6 +7,9 @@ public enum TokenType {
     STRING, NUMBER, INT, DOUBLE,
     AND, OR, IF, THEN, ELSE, TRUE, FALSE, FN, LET, NIL,
 
+    //==, !=, <, >, <=, >=
+    EE, NE, LT, GT, LTE, GTE,
+
     KEYWORD, IDENTIFIER, EQUAL, 
 
     EOF;

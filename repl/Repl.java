@@ -19,7 +19,8 @@ public class Repl {
             //Root node of AST
             ASTNode rootNode = parser.parse();
             Interpreter interpreter = new Interpreter();
-            interpreter.interpret(rootNode);
+            Object result = interpreter.interpret(rootNode);
+            System.out.println(result);
 
         }
     }
