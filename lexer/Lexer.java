@@ -4,13 +4,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import repl.SymbolTable;
+
 public class Lexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
-    private final List<String> keywords = new ArrayList<>(Arrays.asList("VAR", "AND", "OR", "NOT", "IF", "THEN", "ELIF", "ELSE"));
+    private final List<String> keywords = new ArrayList<>(
+        Arrays.asList("VAR", "AND", "OR", 
+        "NOT", "IF", "THEN", 
+        "ELIF", "ELSE", "FOR", 
+        "TO", "STEP", "WHILE",
+        "FN"));
     private int start = 0;
     private int current = 0;
     private int line = 1;
+
+    private static SymbolTable symbolTable = SymbolTable.getInstance();
 
     public Lexer(String source) {
         this.source = source;
@@ -39,15 +48,18 @@ public class Lexer {
             case '(': addToken(TokenType.LEFT_PAREN); break;
             case ')': addToken(TokenType.RIGHT_PAREN); break;
             case '+': addToken(TokenType.PLUS); break;
-            case '-': addToken(TokenType.MINUS); break;
             case '*': addToken(TokenType.MUL); break;
             case '/': addToken(TokenType.DIV); break;
+            case ',': addToken(TokenType.COMMA); break;
             default:
                 if (isDigit(c)) {
                     createNumber();
                 } 
                 else if(isLetter(c)){
                     createIdentifierOrKeyword(c);
+                }
+                else if(c == '-'){
+                    createMinusOrArrow();
                 }
                 else if (c == '!'){
                     createNotEquals();
@@ -65,6 +77,17 @@ public class Lexer {
                     System.out.println("Illegal Character: " + "'" + c + "'");
                 }
                 break;
+        }
+    }
+
+    private void createMinusOrArrow(){
+        //if ->
+        if(peek() == '>'){
+            advance();
+            addToken(TokenType.ARROW);
+        }
+        else{ // if -
+            addToken(TokenType.MINUS);
         }
     }
 

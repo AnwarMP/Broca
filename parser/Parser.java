@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import lexer.Token;
 import lexer.TokenType;
+import repl.SymbolTable;
 
 public class Parser {
     private final List<Token> tokens;
+    private static SymbolTable symbolTable = SymbolTable.getInstance();
     private int current = 0;
     private Token currToken;
 
@@ -53,8 +55,25 @@ public class Parser {
 
             //get expression to assign variable
             this.advance();
-            ASTNode expression = this.expr();
+            ASTNode expression = this.arithExpr();
             return new VarAssignNode(variableName, expression);
+        }
+
+        //if identifier already initialized: "IDENTIFIER" "EQUAL" <arith-expr>
+        if(this.currToken.getType() == TokenType.IDENTIFIER && this.tokens.get(current+1).getType() == TokenType.EQUAL && symbolTable.hasSymbol(currToken.getLexeme())){
+            String variableName = this.currToken.getLexeme();
+
+            //chech if there is an equal
+            this.advance();
+            if(this.currToken.getType() != TokenType.EQUAL){
+                throw new RuntimeException("Expected '='");
+            }
+
+            //get expression to assign variable
+            this.advance();
+            ASTNode expression = this.arithExpr();
+            return new VarAssignNode(variableName, expression);
+
         }
 
         //<comp-expr> (("KEYWORD:AND"|"KEYWORD:OR") <comp-expr>)*
@@ -118,8 +137,8 @@ public class Parser {
 
     public ASTNode term(){
 
-        //<factor> (("MUL" | "DIV") <factor>)*
-        ASTNode left = factor();
+        //<call-func> (("MUL" | "DIV") <factor>)*
+        ASTNode left = callFunc();
         while(current < tokens.size() && (this.currToken.getType() == TokenType.MUL || this.currToken.getType() == TokenType.DIV)){
             Token op = this.currToken;
             this.advance();
@@ -128,6 +147,36 @@ public class Parser {
         }
 
         return left;
+    }
+
+    public ASTNode callFunc(){
+        ASTNode factor = factor();
+
+        List<ASTNode> argNodes = new ArrayList<>();
+        if(currToken.getType() == TokenType.LEFT_PAREN){
+            this.advance();
+
+            if(currToken.getType() == TokenType.RIGHT_PAREN){
+                this.advance();
+            }
+            else{
+                argNodes.add(this.expr());
+
+                while(currToken.getType() == TokenType.COMMA){
+                    this.advance();
+
+                    argNodes.add(this.expr());
+                }
+
+                if(currToken.getType() != TokenType.RIGHT_PAREN){
+                    throw new RuntimeException("Expected ')'");
+                }
+                this.advance();
+            }
+
+            return new CallNode(factor, argNodes);
+        }
+        return factor;
     }
 
     public ASTNode factor(){
@@ -161,8 +210,182 @@ public class Parser {
         else if(tok.getType() == TokenType.KEYWORD && tok.getLexeme().equals("IF")){
             return ifExpr();
         }
+        //<for-expr>
+        else if(tok.getType() == TokenType.KEYWORD && tok.getLexeme().equals("FOR")){
+            return forExpr();
+        }
+        //<while-loop>
+        else if(tok.getType() == TokenType.KEYWORD && tok.getLexeme().equals("WHILE")){
+            return whileExpr();
+        }
+        //<func-def>
+        else if(tok.getType() == TokenType.KEYWORD && tok.getLexeme().equals("FN")){
+            return funcDef();
+        }
         return null;
     }
+
+    /*
+     * "KEYWORD:FN" "IDENTIFIER"?
+        "LEFT_PAREN" ("IDENTIFIER" ("COMMA" "IDENTIFIER")*)? RIGHT_PAREN
+        "ARROW" <expr>
+     */
+    public ASTNode funcDef(){
+        //FN
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("FN")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'FN'");
+        }
+
+        //identifier is optional, check for '('
+        Token varToken;
+        if(currToken.getType() == TokenType.IDENTIFIER){
+            varToken = currToken;
+            this.advance();
+            if(currToken.getType() != TokenType.LEFT_PAREN){
+                throw new RuntimeException("Expected '('");
+            }
+        }
+        else {
+            varToken = null;
+            if(currToken.getType() != TokenType.LEFT_PAREN){
+                throw new RuntimeException("Expected '('");
+            }
+        }
+
+        this.advance();
+        //Get arguments and check ')'
+        List<Token> argNameTokens = new ArrayList<>();
+        if(currToken.getType() == TokenType.IDENTIFIER){
+            argNameTokens.add(currToken);
+            this.advance();
+
+            while(currToken.getType() == TokenType.COMMA){
+                this.advance();
+                if(currToken.getType() != TokenType.IDENTIFIER){
+                    throw new RuntimeException("Expected IDENTIFIER");
+                }
+
+                argNameTokens.add(currToken);
+                this.advance();
+            }
+
+            if(currToken.getType() != TokenType.RIGHT_PAREN){
+                throw new RuntimeException("Expected ',' or ')");
+            }
+        }
+        else {
+            if(currToken.getType() != TokenType.RIGHT_PAREN){
+                throw new RuntimeException("Expected ')");
+            }
+        }
+
+        // ->
+        this.advance();
+        if(currToken.getType() != TokenType.ARROW){
+            throw new RuntimeException("Expected '->'");
+        }
+
+        //execute expression, the node to return
+        this.advance();
+        ASTNode bodyNode = this.expr();
+
+        return new FuncDefNode(varToken, argNameTokens, bodyNode);
+    }
+
+    //<while-expr> ::= "KEYWORD:WHILE" <expr> "KEYWORD:THEN" <expr>
+    public ASTNode whileExpr(){
+        
+        //WHILE
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("WHILE")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'FOR'");
+        }
+
+        ASTNode conditionNode = this.expr();
+
+        //THEN
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("THEN")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'TO'");
+        }
+
+        ASTNode bodyNode = this.expr();
+
+        return new WhileNode(conditionNode, bodyNode);
+    }
+
+    /*
+     * <for-expr> ::= "KEYWORD:FOR" "IDENTIFIER:EQ" <expr> "KEYWORD:TO" <expr> 
+		("KEYWORD:STEP" <expr>)? "KEYWORD:THEN" <expr>
+     */
+     public ASTNode forExpr(){
+
+        //FOR
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("FOR")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'FOR'");
+        }
+
+        //IDENTIFER such as i
+        if(currToken.getType() != TokenType.IDENTIFIER){
+            throw new RuntimeException("Expected Indentifier");
+        }
+
+        Token varToken = currToken;
+        this.advance();
+
+        //=
+        if(currToken.getType() == TokenType.EQUAL){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected '='");
+        }
+
+        //Retrieve start value
+        ASTNode startValue = this.expr();
+
+        //TO
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("TO")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'TO'");
+        }
+
+        //Retrieve end value
+        ASTNode EndValue = this.expr();
+
+        //If applicable, get the step value (increment amount)
+        ASTNode stepNode = null;
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("STEP")){
+            this.advance();
+            stepNode = this.expr();
+        }
+
+        //THEN
+        if(currToken.getType() == TokenType.KEYWORD && currToken.getLexeme().equals("THEN")){
+            this.advance();
+        }
+        else{
+            throw new RuntimeException("Expected 'TO'");
+        }
+
+        //Body, what to execute
+        ASTNode bodyNode = this.expr();
+
+        return new ForNode(varToken, startValue, EndValue, stepNode, bodyNode);
+
+     }
 
     /*
      * "KEYWORD:IF" <expr> "KEYWORD:THEN" <expr>
@@ -170,7 +393,6 @@ public class Parser {
                 ("KEYWORD:ELSE" <expr>)?
      */
     public ASTNode ifExpr(){
-        Token tok = tokens.get(current);
         List<Case> cases = new ArrayList<>();
         ASTNode elseCase = null;
 

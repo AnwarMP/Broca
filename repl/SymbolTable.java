@@ -1,36 +1,47 @@
 package repl;
 
 import java.util.*;
-import parser.*;
-import lexer.*;
 
-public class SymbolTable{
+public class SymbolTable {
     private Map<String, Object> symbols = new HashMap<>();
+    private SymbolTable parent; // Reference to parent symbol table
 
-    private static final SymbolTable instance = new SymbolTable();
+    private static final SymbolTable globalInstance = new SymbolTable();
 
-    public SymbolTable(){
-
+    SymbolTable() {
+        this.parent = null; // Global symbol table has no parent
     }
 
-    public Object get(String varName){
+    // Constructor for creating a local scope symbol table with a reference to its parent
+    public SymbolTable(SymbolTable parent) {
+        this.parent = parent;
+    }
+
+    public Object get(String varName) {
         Object value = symbols.get(varName);
+        if (value == null && parent != null) {
+            return parent.get(varName); // Check in the parent symbol table
+        }
         return value;
     }
 
-    public void put(String varName, Object value){
+    public void put(String varName, Object value) {
         symbols.put(varName, value);
     }
 
-    public void remove(String varName){
+    public void remove(String varName) {
         symbols.remove(varName);
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return symbols.isEmpty();
     }
 
-    public static SymbolTable getInstance(){
-        return instance;
+    public boolean hasSymbol(String key) {
+        return symbols.containsKey(key) || (parent != null && parent.hasSymbol(key));
+    }
+
+    public static SymbolTable getInstance() {
+        return globalInstance;
     }
 }

@@ -162,3 +162,101 @@ class Case {
         return this.expression;
     }
 }
+
+class ForNode extends ASTNode{
+    private Token varToken;
+    private ASTNode startNode;
+    private ASTNode endNode;
+    private ASTNode stepNode;
+    private ASTNode bodyNode;
+    
+    public ForNode(Token varToken, ASTNode startNode, ASTNode endNode, ASTNode stepNode, ASTNode bodyNode){
+        this.varToken = varToken;
+        this.startNode = startNode;
+        this.endNode = endNode;
+        this.stepNode = stepNode;
+        this.bodyNode = bodyNode;
+    }
+
+    public Token getVarToken(){
+        return this.varToken;
+    }
+
+    public ASTNode getStartNode(){
+        return this.startNode;
+    }
+
+    public ASTNode getEndNode(){
+        return this.endNode;
+    }
+
+    public ASTNode getStepNode(){
+        return this.stepNode;
+    }
+
+    public ASTNode getBodyNode(){
+        return this.bodyNode;
+    }
+
+}
+
+class WhileNode extends ASTNode{
+    private ASTNode conditionNode;
+    private ASTNode bodyNode;
+
+    public WhileNode(ASTNode conditionNode, ASTNode bodyNode){
+        this.conditionNode = conditionNode;
+        this.bodyNode = bodyNode;
+    }
+
+    public ASTNode getConditionNode(){
+        return this.conditionNode;
+    }
+
+    public ASTNode getBodyNode(){
+        return this.bodyNode;
+    }
+
+}
+
+class FuncDefNode extends ASTNode{
+    private Token varToken;
+    private List<Token> argNameTokens;
+    private ASTNode bodyNode;
+
+    public FuncDefNode(Token varToken, List<Token> argNameTokens, ASTNode bodyNode){
+        this.varToken = varToken;
+        this.argNameTokens = argNameTokens;
+        this.bodyNode = bodyNode;
+    }
+
+    public Token getVarToken(){
+        return this.varToken;
+    }
+
+    public List<Token> getArgNameTokens(){
+        return this.argNameTokens;
+    }
+
+    public ASTNode getBodyNode(){
+        return this.bodyNode;
+    }
+}
+
+class CallNode extends ASTNode{
+    private ASTNode callFuncNode;
+    private List<ASTNode> argNodes;
+
+    public CallNode(ASTNode callFuncNode, List<ASTNode> argNodes){
+        this.callFuncNode = callFuncNode;
+        this.argNodes = argNodes;
+    }
+
+    public ASTNode getCallFuncNode(){
+        return this.callFuncNode;
+    }
+
+    public List<ASTNode> getArgNodes(){
+        return this.argNodes;
+    }
+}

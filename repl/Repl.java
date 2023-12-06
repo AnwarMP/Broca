@@ -12,7 +12,13 @@ public class Repl {
         while (true) {
             System.out.print("Broca > ");
             String line = scanner.nextLine();
-            if (line == null) break;
+
+            if(line.equalsIgnoreCase("stop")){
+                System.out.println("Exiting Broca...");
+                break;
+            }
+            
+            if(line == null) break;
 
             Lexer lexer = new Lexer(line);
             Parser parser = new Parser(lexer.scanTokens());
@@ -23,5 +29,7 @@ public class Repl {
             System.out.println(result);
 
         }
+
+        scanner.close();
     }
 }
