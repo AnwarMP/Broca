@@ -33,18 +33,15 @@ public class Lexer {
 
         //Indicate the End of File
         tokens.add(new Token(TokenType.EOF, "", null, line));
-        //Print tokens
-        // for(Token s: tokens){
-        //     System.out.println(s.toString());
-        // }
         return tokens;
     }
 
+    /*
+     * Tokenization process for each character
+     */
     private void scanToken() {
         char c = advance();
-        //System.out.println("index: " + current + ", char: " + c);
         switch (c) {
-            //case '=': addToken(TokenType.EQUAL); break;
             case '(': addToken(TokenType.LEFT_PAREN); break;
             case ')': addToken(TokenType.RIGHT_PAREN); break;
             case '+': addToken(TokenType.PLUS); break;

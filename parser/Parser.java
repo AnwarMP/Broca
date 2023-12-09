@@ -20,7 +20,7 @@ public class Parser {
     //To parse, follow the grammar --> start with expr
     public ASTNode parse() {
         ASTNode parsedExpression = this.expr();
-        //System.out.println("Parser: " + parsedExpression.toString());
+        //Return root node of AST
         return parsedExpression;
     }
 
@@ -38,7 +38,6 @@ public class Parser {
     /*
      * Turning our grammar to parsing functions
      */
-
     public ASTNode expr(){
 
         //"KEYWORD:VAR" "IDENTIFIER" "EQUAL" <arith-expr>
@@ -136,7 +135,6 @@ public class Parser {
     }
 
     public ASTNode term(){
-
         //<call-func> (("MUL" | "DIV") <factor>)*
         ASTNode left = callFunc();
         while(current < tokens.size() && (this.currToken.getType() == TokenType.MUL || this.currToken.getType() == TokenType.DIV)){

@@ -1,33 +1,33 @@
-<expr> ::= "KEYWORD:VAR" "IDENTIFIER" "EQUAL" <arith-expr>
-        | "IDENTIFIER" "EQUAL" <arith-expr>
-        | <comp-expr> (("KEYWORD:AND"|"KEYWORD:OR") <comp-expr>)*
+<expr>          ::= "KEYWORD:VAR" "IDENTIFIER" "EQUAL" <arith-expr>
+                | "IDENTIFIER" "EQUAL" <arith-expr>
+                | <comp-expr> (("KEYWORD:AND"|"KEYWORD:OR") <comp-expr>)*
 
-<comp-expr> ::= NOT <comp-expr>
-        | <arthi-expr> (("EE"|"LT"|"GT"|"LTE"|"GTE") <arthi-expr>)*
+<comp-expr>     ::= NOT <comp-expr>
+                | <arthi-expr> (("EE"|"LT"|"GT"|"LTE"|"GTE") <arthi-expr>)*
 
-<arith-expr> ::= <term> (("PLUS" | "MINUS") <term>)*
+<arith-expr>    ::= <term> (("PLUS" | "MINUS") <term>)*
 
-<term> ::= <factor> (("MUL" | "DIV") <factor>)*
+<term>          ::= <factor> (("MUL" | "DIV") <factor>)*
 
-<call-func> ::= <factor> ("LEFT_PAREN" (<expr> ("COMMA" "IDENTIFIER")*)? "RIGHT_PAREN")?
+<call-func>     ::= <factor> ("LEFT_PAREN" (<expr> ("COMMA" "IDENTIFIER")*)? "RIGHT_PAREN")?
 
-<factor> ::= ("PLUS" | "MINUS") <factor>
-         | "INT" | "DOUBLE" | "IDENTIFIER"
-         | "LEFT_PAREN" <expr> "RIGHT_PAREN"
-         | <if=expr>
-         | <for-expr>
-         | <while-expr>
-         | <func-def>
+<factor>        ::= ("PLUS" | "MINUS") <factor>
+                | "INT" | "DOUBLE" | "IDENTIFIER"
+                | "LEFT_PAREN" <expr> "RIGHT_PAREN"
+                | <if=expr>
+                | <for-expr>
+                | <while-expr>
+                | <func-def>
 
-<if-expr> ::= "KEYWORD:IF" <expr> "KEYWORD:THEN" <expr>
+<if-expr>       ::= "KEYWORD:IF" <expr> "KEYWORD:THEN" <expr>
                 ("KEYWORD:ELIF" <expr> "KEYWORD:THEN" <expr>)*
-                ("KEYWORD:ELS E" <expr>)?
+                ("KEYWORD:ELSE" <expr>)?
 
-<for-expr> ::= "KEYWORD:FOR" "IDENTIFIER:EQ" <expr> "KEYWORD:TO" <expr> 
+<for-expr>      ::= "KEYWORD:FOR" "IDENTIFIER:EQ" <expr> "KEYWORD:TO" <expr> 
 		("KEYWORD:STEP" <expr>)? "KEYWORD:THEN" <expr>
 
-<while-expr> ::= "KEYWORD:WHILE" <expr> "KEYWORD:THEN" <expr>
+<while-expr>    ::= "KEYWORD:WHILE" <expr> "KEYWORD:THEN" <expr>
 
-<func-def> ::= "KEYWORD:FN" "IDENTIFIER"?
-        "LEFT_PAREN" ("IDENTIFIER" ("COMMA" "IDENTIFIER")*)? RIGHT_PAREN
-        "ARROW" <expr>
+<func-def>      ::= "KEYWORD:FN" "IDENTIFIER"?
+                "LEFT_PAREN" ("IDENTIFIER" ("COMMA" "IDENTIFIER")*)? RIGHT_PAREN
+                "ARROW" <expr>

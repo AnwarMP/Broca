@@ -9,8 +9,6 @@ import parser.*;
 import repl.*;
 
 public class Interpreter {
-
-    //private static SymbolTable symbolTable = SymbolTable.getInstance();
     private SymbolTable symbolTable;
 
     public Interpreter() {
@@ -23,11 +21,14 @@ public class Interpreter {
     }
 
     public Object interpret(ASTNode node) {
-        Object result = visitNode(node);
+        Object result = visitNode(node); //Parameter: root node of AST
         return result;
     }
 
-    private Object visitNode(ASTNode node){ //Visit the ASTNodes of the AST
+    /*
+     * Visit the appropiate node's function to perform specific logic
+     */
+    private Object visitNode(ASTNode node){
         if (node instanceof NumberNode) {
             return visitNumberNode((NumberNode) node);
         } 
@@ -69,12 +70,11 @@ public class Interpreter {
                                     .map(Token::getLexeme)
                                     .collect(Collectors.toList());
 
-        // Here you store the function definition in your symbol table.
-        // You need to define a class or a structure to store function definitions.
+        // Store the function definition in the symbol table.
         FunctionDefinition funcDef = new FunctionDefinition(argNames, node.getBodyNode());
         symbolTable.put(funcName, funcDef);
 
-        return "<function: " + funcName +">"; // Function definition doesn't return a value during definition time
+        return "<function: " + funcName +">";
     }
 
     private Object visitCallNode(CallNode node) {
@@ -86,6 +86,7 @@ public class Interpreter {
         }
 
         FunctionDefinition funcDef = (FunctionDefinition) toCall;
+        // Store argument values for every argument node
         List<Object> argValues = new ArrayList<>();
         for (ASTNode argNode : node.getArgNodes()) {
             argValues.add(visitNode(argNode));
@@ -102,15 +103,11 @@ public class Interpreter {
             functionSymbolTable.put(funcDef.getArgNames().get(i), argValues.get(i));
         }
 
-        // Execute the function with its own symbol table
+        // Execute the function (BodyNode) with its own symbol table to maintain scope
         return new Interpreter(functionSymbolTable).visitNode(funcDef.getBodyNode());
     }
 
-
-
-
     private Object visitForNode(ForNode node){
-
         Object startValue = this.visitNode(node.getStartNode());
         Object endValue = this.visitNode(node.getEndNode());
         
@@ -205,7 +202,6 @@ public class Interpreter {
     }
 
     private Object visitNumberNode(NumberNode node) {
-        //System.out.println("Number Node.");
         Object literal = node.getToken().getLiteral();
     
         // Literals are stored as Strings, so parse accordingly and return
@@ -219,7 +215,6 @@ public class Interpreter {
     }
     
     private Object visitUnaryNode(UnaryOpNode node) {
-        //System.out.println("Unary Node.");
         Object operand = visitNode(node.getNode());
     
         if (node.getOperator().getType() == TokenType.MINUS) {
@@ -234,7 +229,6 @@ public class Interpreter {
     }
 
     private Object visitBinOpNode(BinOpNode node) {
-        //System.out.println("BinOp Node.");
         Object leftObject = visitNode(node.getLeftNode());
         Object rightObject = visitNode(node.getRightNode());
     
@@ -325,6 +319,9 @@ public class Interpreter {
     
 }
 
+/*
+ *  Class for creating new function class
+ */
 class FunctionDefinition {
     private List<String> argNames; // Names of the arguments
     private ASTNode bodyNode; // The body of the function
